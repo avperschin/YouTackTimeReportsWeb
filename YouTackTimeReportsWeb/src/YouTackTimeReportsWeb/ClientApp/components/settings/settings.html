@@ -1,0 +1,41 @@
+﻿<div class="page-header">
+    <h1>Настройки приложения</h1>
+</div>
+<div class="alert alert-warning" role="alert" *ngIf="!settingsFill">Заполните требуемые параметры!</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <form class="bs-example bs-example-form" data-settings-id="settings-input-groups">
+            <label for="host">Введите адрес сервера</label>
+            <div class="input-group">
+                <input type="text" class="form-control" aria-label="Введите адрес сервера" id="host" name="host" [(ngModel)]="host">
+                <span class="input-group-addon">например: ваш_сервер.myjetbrains.com</span>
+            </div>
+            <label for="port">Введите порт</label>
+            <div class="input-group">
+                <input type="text" class="form-control" aria-label="Введите порт" id="port" name="port" [(ngModel)]="port">
+                <span class="input-group-addon">например: 80</span>
+            </div>
+            <label for="path">Введите путь</label>
+            <div class="input-group">
+                <input type="text" class="form-control" aria-label="Введите путь" id="path" name="path" [(ngModel)]="path">
+                <span class="input-group-addon">например: youtrack</span>
+            </div>
+            <label for="login">Введите имя пользователя</label>
+            <div class="input-group">
+                <input type="text" class="form-control" aria-label="Введите имя пользователя" id="login" name="login" [(ngModel)]="login">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+            </div>
+            <label for="password">Введите пароль</label>
+            <div class="input-group">
+                <input type="password" class="form-control" aria-label="Введите пароль" id="password" name="password" [(ngModel)]="password">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" id="isssl" name="isssl" #issslpcb (change)="isssl = issslpcb.checked" [checked]="isssl"> Использовать SSL
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary" (click)="SaveSettings()">Сохранить</button>
+        </form>
+    </div>
+</div>

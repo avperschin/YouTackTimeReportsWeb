@@ -1,0 +1,106 @@
+﻿
+<div class="alert alert-warning top20" role="alert" *ngIf="!settingsFill">{{message}}</div>
+<div class="alert alert-danger top20" role="alert" *ngIf="status">{{errorMessage}}</div>
+<div class="panel panel-primary top15">
+    <div class="panel-heading">Задайте параметры запроса</div>
+    <ng2-slim-loading-bar></ng2-slim-loading-bar>
+    <div class="panel-body">
+        <form class="bs-example bs-example-form" data-parameters-id="parameters-input-groups">
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="dateStart">Выберите дату начала отчета</label>
+                    <ng2-datepicker [ID]="'dateStart'" (dateSelected)="dateStart = $event"></ng2-datepicker>
+                </div>
+                <div class="col-md-3">
+                    <label for="dateStart">Выберите дату окончания отчета</label>
+                    <ng2-datepicker [ID]="'dateEnd'" (dateSelected)="dateEnd = $event"></ng2-datepicker>
+                </div>
+                <div class="col-md-3">
+                    <label for="projectId">Введите ID проекта</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" aria-label="Введите ID проектат" id="projectId" name="projectId" [(ngModel)]="projectId">
+                        <span class="input-group-addon">например: TEST</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary top25" (click)="SendForReport()" [disabled]="!settingsFill || !projectId || !dateStart || !dateEnd">
+                        <span *ngIf="!loading">
+                            Сформировать отчет
+                        </span>
+                        <span *ngIf="loading">
+                            Загрузка отчета
+                            <i class="glyphicon glyphicon-refresh spinner"></i>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="panel panel-primary top15" *ngIf="report">
+    <div class="panel-heading">Результаты отчета по проекту "{{ report.projectName }}" с {{ dateStart.format('DD.MM.YYYY') }} по {{ dateEnd.format('DD.MM.YYYY') }}</div>
+    <div class="panel-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Имя</th>
+                        <th class="text-center" width="60">P</th>
+                        <th class="text-center" width="60">%</th>
+                        <th class="text-center" width="60">&sum;</th>
+                        <th class="text-center text-capitalize" width="60" *ngFor="let data of report.dateList">
+                            {{ data.date | unixToDate : 1 }}<br />{{ data.date | date:"dd" }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let user of report.userReports">
+                        <th scope="row">{{ user.userName }}</th>
+                        <td class="text-center"><span *ngIf="user.estimation > 0">{{ user.estimation | number:'.0-1' }}</span></td>
+                        <td class="text-center"><span *ngIf="user.norm > 0">{{ user.norm | number:'.0-1' }}%</span></td>
+                        <td class="text-center"><span *ngIf="user.duration > 0">{{ user.duration | number:'.0-1' }}</span></td>
+                        <td class="text-center" *ngFor="let days of user.workingDays" [class.danger]="!days.isWorkingDay"><span *ngIf="days.duration > 0">{{ days.duration | number:'.0-1' }}</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" colspan="4" class="text-right">Всего часов ежедневно</th>
+                        <td class="text-center border-bottom" *ngFor="let data of report.dateList"  [class.border-bottom-right]="data.isMaxDateOfWeek"><span *ngIf="data.duration > 0">{{ data.duration | number:'.0-1' }}</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" colspan="4" class="text-right">Всего часов еженедельно</th>
+                        <td class="text-center border-bottom" *ngFor="let data of report.dateList"  [class.border-bottom-right]="data.isMaxDateOfWeek"><span *ngIf="data.durationWeek > 0">{{ data.durationWeek | number:'.0-1' }}</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" colspan="4" class="text-right">Всего запланированных часов</th>
+                        <td class="text-center border-bottom" *ngFor="let data of report.dateList"  [class.border-bottom-right]="data.isMaxDateOfWeek"><span *ngIf="data.estimation > 0">{{ data.estimation | number:'.0-1' }}</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <table class="table table-hover" align="right" style="width:30%;">
+            <thead>
+                <tr>
+                    <th class="text-right">Всего</th>
+                    <th class="text-center" width="118">Сегодня</th>
+                    <th class="text-center" width="118">Период</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row" class="text-right">Отработаные</th>
+                    <td class="text-center">{{ report.durationToday | number:'.0-1' }}</td>
+                    <td class="text-center">{{ report.duration | number:'.0-1' }}</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="text-right">Запланированные</th>
+                    <td class="text-center">{{ report.estimationToday | number:'.0-1' }}</td>
+                    <td class="text-center">{{ report.estimation | number:'.0-1' }}</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="text-right">Требуемые</th>
+                    <td class="text-center">{{ report.normToday | number:'.0-1' }}</td>
+                    <td class="text-center">{{ report.norm | number:'.0-1' }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
