@@ -1,4 +1,6 @@
 ﻿using Flurl.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Dynamic;
 using System.Net;
@@ -9,42 +11,38 @@ namespace YouTackTimeReportsWeb.Services
 {
     public class Connection : IConnection
     {
-        readonly string _host;
-        readonly int _port;
         readonly IUriConstructor _uriConstructor;
-        string _username;
         FlurlClient _client;
         public bool IsAuthenticated { get; private set; }
 
-        public Connection(string host, int port = 80, bool useSSL = false, string path = null)
+        public Connection(string host, int port = 80, bool useSsl = false, string path = null)
         {
             var protocol = "http";
 
-            _host = host;
-            _port = port;
 
-
-            if (useSSL)
+            if (useSsl)
             {
                 protocol = "https";
             }
 
-            _uriConstructor = new UriConstructor(protocol, _host, _port, path);
+            _uriConstructor = new UriConstructor(protocol, host, port, path);
         }
         public async Task<string> PostJson(string request, object data)
         {
             try
             {
                 var baseUri = _uriConstructor.ConstructBaseUri(request);
+                JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+                {
+                    Formatting = Formatting.Indented,
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                };
                 var response = await baseUri.WithClient(_client).PostJsonAsync(data);
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadAsStringAsync();
                 }
-                else
-                {
-                    throw new Exception(response.ReasonPhrase);
-                }
+                throw new Exception(response.ReasonPhrase);
             }
             catch (FlurlHttpException exception)
             {
@@ -123,7 +121,6 @@ namespace YouTackTimeReportsWeb.Services
         private async Task<bool> Authenticate(string username, string password)
         {
             IsAuthenticated = false;
-            _username = String.Empty;
 
             dynamic credentials = new ExpandoObject();
 
@@ -137,8 +134,7 @@ namespace YouTackTimeReportsWeb.Services
 
                 var response = await baseUri.WithClient(_client).PostUrlEncodedAsync(new
                 {
-                    login = credentials.login,
-                    password = credentials.password
+                    credentials.login, credentials.password
                 });
                 if (response.IsSuccessStatusCode)
                 {
@@ -146,7 +142,6 @@ namespace YouTackTimeReportsWeb.Services
                     if (message.Contains("ok"))
                     {
                         IsAuthenticated = true;
-                        _username = username;
                         return IsAuthenticated;
                     }
                     else
@@ -168,11 +163,7 @@ namespace YouTackTimeReportsWeb.Services
         public void Logout()
         {
             IsAuthenticated = false;
-            if(_client != null)
-            {
-                _client.Dispose();
-            }
-            _username = null;
+            _client?.Dispose();
         }
     }
 }

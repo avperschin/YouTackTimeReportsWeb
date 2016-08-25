@@ -40,11 +40,11 @@ export class Report {
     public errorMessage: string;
     public status: boolean;
     public loading: boolean;
-    public report: ResultsData;
+    public report: IResultsData;
 
     constructor(private http: Http) { }
 
-    SendForReport() {
+    sendForReport() {
         this.report = null;
         this.loading = true;
 
@@ -61,11 +61,11 @@ export class Report {
         params.set('projectid', this.projectId);
 
         this.http.get(reportUrl, { search: params }).subscribe(result => {
-            if (result.json().status == 0) {
+            if (result.json().status === 0) {
                 this.status = true;
                 this.errorMessage = result.json().error;
             }
-            if (result.json().status == 1) {
+            if (result.json().status === 1) {
                 this.status = false;
                 this.errorMessage = null;
                 this.report = result.json().report;
@@ -75,43 +75,43 @@ export class Report {
     }
 }
 
-interface ResultsData {
-    UserReports: UserReport[];
-    DateList: DateList[];
-    Duration: number;
-    Estimation: number;
-    Norm: number;
-    DurationToday: number;
-    EstimationToday: number;
-    NormToday: number;
-    ProjectName: string;
+interface IResultsData {
+    userReports: IUserReport[];
+    dateList: IDateList[];
+    duration: number;
+    estimation: number;
+    norm: number;
+    durationToday: number;
+    estimationToday: number;
+    normToday: number;
+    projectName: string;
 }
 
-interface UserReport {
-    UserName: string;
-    UserLogin: string;
-    GroupName: string;
-    WorkingDays: WorkingDays[];
-    Duration: number;
-    Estimation: number;
-    Norm: number;
+interface IUserReport {
+    userName: string;
+    userLogin: string;
+    groupName: string;
+    workingDays: IWorkingDays[];
+    duration: number;
+    dstimation: number;
+    norm: number;
 }
 
-interface WorkingDays {
-    DateTime: Date;
-    Duration: number;
-    Estimation: number;
-    Norm: number;
-    WeekNumber: number;
-    IsWorkingDay: boolean;
+interface IWorkingDays {
+    dateTime: Date;
+    duration: number;
+    estimation: number;
+    norm: number;
+    weekNumber: number;
+    isWorkingDay: boolean;
 }
 
-interface DateList {
-    Date: Date;
-    Duration: number;
-    Estimation: number;
-    WeekNumber: number;
-    IsMaxDateOfWeek: boolean;
-    DurationWeek: number;
-    EstimationWeek: number;
+interface IDateList {
+    date: Date;
+    duration: number;
+    estimation: number;
+    weekNumber: number;
+    isMaxDateOfWeek: boolean;
+    durationWeek: number;
+    estimationWeek: number;
 }

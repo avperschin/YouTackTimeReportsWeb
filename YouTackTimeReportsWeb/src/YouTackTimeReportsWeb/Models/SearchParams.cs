@@ -2,14 +2,14 @@
 {
     public class SearchParams
     {
-        public string host { get; set; }
-        public int port { get; set; }
-        public string path { get; set; }
-        public string login { get; set; }
-        public string password { get; set; }
-        public bool isssl { get; set; }
-        public string datestart { get; set; }
-        public string dateend { get; set; }
-        public string projectid { get; set; }
+        public string Host { get; set; }
+        public int Port { get; set; }
+        public string Path { get; set; }
+        public string Login { get; set; }
+        public string Password { get; set; }
+        public bool IsSsl { get; set; }
+        public string DateStart { get; set; }
+        public string DateEnd { get; set; }
+        public string ProjectId { get; set; }
     }
 }

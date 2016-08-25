@@ -7,7 +7,7 @@ namespace YouTackTimeReportsWeb.Utils
     {
         public static T Deserialize<T>(this XDocument source)
         {
-            if (source == null || source.Root == null)
+            if (source?.Root == null)
                 return default(T);
 
             using (var reader = source.Root.CreateReader())

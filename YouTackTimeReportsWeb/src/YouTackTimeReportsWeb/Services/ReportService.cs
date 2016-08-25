@@ -20,7 +20,7 @@ namespace YouTackTimeReportsWeb.Services
         }
         public async Task<FinalReport> GetReports(SearchParams parameters)
         {
-            var project = await GetProject(parameters.projectid);
+            var project = await GetProject(parameters.ProjectId);
             if(project == null)
             {
                 throw new Exception("Произошла ошибка! Проект с таким ID не найден!");
@@ -28,8 +28,8 @@ namespace YouTackTimeReportsWeb.Services
             FinalReport finalReports = new FinalReport();
             DateTime outputStartDate;
             DateTime outputEndDate;
-            DateTime.TryParseExact(parameters.datestart + " 00:00:00", "dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out outputStartDate);
-            DateTime.TryParseExact(parameters.dateend + " 23:59:59", "dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out outputEndDate);
+            DateTime.TryParseExact(parameters.DateStart + " 00:00:00", "dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out outputStartDate);
+            DateTime.TryParseExact(parameters.DateEnd + " 23:59:59", "dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out outputEndDate);
 
             TimeSpan oneDay = TimeSpan.FromDays(1);
             int i = 0;
@@ -42,29 +42,31 @@ namespace YouTackTimeReportsWeb.Services
                 long de = UnixTimeStampUTC(date.AddHours(23).AddMinutes(59).AddSeconds(59));
                 string reportName = "TimeReport_" + i;
                 //Формируем создаваемый отчет с параметрами: фиксированный, за определенную дату, для заданного проекта с группировкой по пользователям
-                var createReport = new CreateReport() { type = "time", parameters = new CreateReportParameters() { range = new Range() { type = "fixed", from = ds, to = de }, projects = new List<Projects>() { new Projects() { name = project.Name, shortName = project.Id } }, groupById = "WORK_AUTHOR" }, own = true, name = reportName };
+                var createReport = new CreateReport() { Type = "time", Parameters = new CreateReportParameters() { Range = new Range() { Type = "fixed", From = ds, To = de }, Projects = new List<Projects>() { new Projects() { Name = project.Name, ShortName = project.Id } }, GroupById = "WORK_AUTHOR" }, Own = true, Name = reportName };
                 //Отправляем создаваемый отчет на сервер, в ответ получаем ID отчета
-                string reportId = await CreateReport(createReport);
+                var reportId = await CreateReport(createReport);
                 //Получаем результаты отчета с сервера
                 var report = await GetReport(reportId);
                 //Добавляем дополнительные значения в отчет
-                report.reportDate = date;
-                if (report.reportData.groups.Count > 0) report.reportFill = true;
+                report.ReportDate = date;
+                if (report.ReportData.Groups.Count > 0) report.ReportFill = true;
                 //Добавляем отчет в список отчетов
                 reports.Add(report);
                 //Удаляем отчет с сервера
-                var del = await DeleteReport(reportId);
-                DateList _dateList = new DateList();
-                _dateList.Date = date;
-                _dateList.WeekNumber = GetWeekNumber(date);
-                finalReports.DateList.Add(_dateList);
+                if (reportId != null) await DeleteReport(reportId);
+                DateList dateList = new DateList
+                {
+                    Date = date,
+                    WeekNumber = GetWeekNumber(date)
+                };
+                finalReports.DateList.Add(dateList);
                 i++;
             }
             //Проверяем пустые отчеты или нет
-            if (reports.Where(r => r.reportFill == true).ToList().Count > 0)
+            if (reports.Where(r => r.ReportFill).ToList().Count > 0)
             {
                 //Получаем список пользователей с сервера
-                var users = await GetUsers(null, null, null, parameters.projectid, null, null, null);
+                var users = await GetUsers(null, null, null, parameters.ProjectId);
                 //Получаем настройки тайм трекинга с сервера
                 var timesettings = await GetTimeSettings();
                 finalReports.UserReports = new List<UserReport>();
@@ -72,17 +74,22 @@ namespace YouTackTimeReportsWeb.Services
                 //Подготовительный цикл формирования окончательного отчета, в нем заполняем поля на основе списка пользователей и настроек тайм трекинга
                 foreach (var user in users)
                 {
-                    UserReport userReport = new UserReport();
-                    userReport.UserName = user.FullName;
-                    userReport.UserLogin = user.Username;
-                    userReport.WorkingDays = new List<WorkingDay>();
+                    UserReport userReport = new UserReport
+                    {
+                        UserName = user.FullName,
+                        UserLogin = user.Username,
+                        WorkingDays = new List<WorkingDay>()
+                    };
                     finalReports.DateList.ForEach(date =>
                     {
-                        WorkingDay workingDay = new WorkingDay();
-                        workingDay.Date = date.Date;
-                        workingDay.Duration = 0;
-                        workingDay.Estimation = 0;
-                        workingDay.Norm = 0;
+                        WorkingDay workingDay = new WorkingDay
+                        {
+                            Date = date.Date,
+                            Duration = 0,
+                            Estimation = 0,
+                            Norm = 0,
+                            WeekNumber = date.WeekNumber
+                        };
                         timesettings.WorkWeek.ForEach(workDay =>
                         {
                             WorkDay wd = (WorkDay)workDay;
@@ -92,7 +99,6 @@ namespace YouTackTimeReportsWeb.Services
                                 workingDay.IsWorkingDay = true;
                             }
                         });
-                        workingDay.WeekNumber = date.WeekNumber;
                         userReport.WorkingDays.Add(workingDay);
                     });
                     finalReports.UserReports.Add(userReport);
@@ -103,46 +109,43 @@ namespace YouTackTimeReportsWeb.Services
                     //Третий цикл формирования окончательного отчета, в нем заполняем для каждого пользователя данные о запланированных часах и отработанных часах
                     finalReport.WorkingDays.ForEach(day =>
                     {
-                        var report = reports.Where(r => r.reportDate == day.Date).FirstOrDefault();
-                        if (report != null)
+                        var report = reports.FirstOrDefault(r => r.ReportDate == day.Date);
+                        var group = report?.ReportData.Groups.FirstOrDefault(g => g.Name == finalReport.GroupName);
+                        if (@group != null)
                         {
-                            var group = report.reportData.groups.Where(g => g.name == finalReport.GroupName).FirstOrDefault();
-                            if (group != null)
+                            day.Duration = @group.DurationNumber;
+                            if (@group.DurationNumber == 0)
                             {
-                                day.Duration = group.durationNumber;
-                                if (group.durationNumber == 0)
-                                {
-                                    day.Duration = group.lines.Sum(l => l.durationNumber);
-                                }
-                                day.Estimation = group.estimationNumber;
-                                if (group.estimationNumber == 0)
-                                {
-                                    day.Estimation = group.lines.Sum(l => l.estimationNumber);
-                                }
+                                day.Duration = @group.Lines.Sum(l => l.DurationNumber);
+                            }
+                            day.Estimation = @group.EstimationNumber;
+                            if (@group.EstimationNumber == 0)
+                            {
+                                day.Estimation = @group.Lines.Sum(l => l.EstimationNumber);
                             }
                         }
                     });
                     double sum = finalReport.WorkingDays.Sum(d => d.Duration);
                     int sumNorm = finalReport.WorkingDays.Sum(d => d.Norm);
-                    double Norm = (sum * 100) / sumNorm;
+                    double norm = (sum * 100) / sumNorm;
                     double sumPlan = finalReport.WorkingDays.Sum(d => d.Estimation);
                     finalReport.Estimation = sumPlan;
-                    finalReport.Norm = Norm;
+                    finalReport.Norm = norm;
                     finalReport.Duration = sum;
                 });
                 var workingDays = finalReports.UserReports.SelectMany(r => r.WorkingDays);
-                finalReports.DateList.ForEach(_dateList =>
+                finalReports.DateList.ForEach(dateList =>
                 {
-                    var maxDate = finalReports.DateList.Where(d => d.WeekNumber == _dateList.WeekNumber).Max(d => d.Date);
-                    var Days = workingDays.Where(d => d.WeekNumber == _dateList.WeekNumber);
-                    if (maxDate == _dateList.Date)
+                    var maxDate = finalReports.DateList.Where(d => d.WeekNumber == dateList.WeekNumber).Max(d => d.Date);
+                    var days = workingDays.Where(d => d.WeekNumber == dateList.WeekNumber).ToList();
+                    if (maxDate == dateList.Date)
                     {
-                        _dateList.DurationWeek = Days.Sum(l => l.Duration);
-                        _dateList.EstimationWeek = Days.Sum(l => l.Estimation);
-                        _dateList.IsMaxDateOfWeek = true;
+                        dateList.DurationWeek = days.Sum(l => l.Duration);
+                        dateList.EstimationWeek = days.Sum(l => l.Estimation);
+                        dateList.IsMaxDateOfWeek = true;
                     }
-                    _dateList.Duration = workingDays.Where(d => d.Date == _dateList.Date).Sum(s => s.Duration);
-                    _dateList.Estimation = workingDays.Where(d => d.Date == _dateList.Date).Sum(s => s.Estimation);
+                    dateList.Duration = workingDays.Where(d => d.Date == dateList.Date).Sum(s => s.Duration);
+                    dateList.Estimation = workingDays.Where(d => d.Date == dateList.Date).Sum(s => s.Estimation);
                 });
 
                 DateTime now = DateTime.Now;
@@ -152,12 +155,12 @@ namespace YouTackTimeReportsWeb.Services
 
                 finalReports.Duration = workingDays.Sum(d => d.Duration);
                 finalReports.Estimation = workingDays.Sum(d => d.Estimation);
-                int Weeks = workingDays.GroupBy(w => w.WeekNumber).Count();
-                int WorkingDays = workingDays.GroupBy(w => w.Date).Count();
-                int weekDays = Weeks * timesettings.DaysAWeek;
-                if (Weeks == 1)
+                int weeks = workingDays.GroupBy(w => w.WeekNumber).Count();
+                int workingDaysCount = workingDays.GroupBy(w => w.Date).Count();
+                int weekDays = weeks * timesettings.DaysAWeek;
+                if (weeks == 1)
                 {
-                    weekDays = WorkingDays;
+                    weekDays = workingDaysCount;
                 }
                 finalReports.Norm = timesettings.HoursADay * weekDays * finalReports.UserReports.Count;
             }
@@ -171,29 +174,27 @@ namespace YouTackTimeReportsWeb.Services
         {
             string command = "current/reports";
             var response = await _connection.PostJson(command, report);
-            Report _report = JsonConvert.DeserializeObject<Report>(response);
-            return _report.id;
+            Report rep = JsonConvert.DeserializeObject<Report>(response);
+            return rep.Id;
         }
-        private async Task<Report> GetReport(string Id)
+        private async Task<Report> GetReport(string id)
         {
-            string command = String.Format("current/reports/{0}", Id);
-            var queryString = new Dictionary<string, object>();
-            queryString["fields"] = "reportData,oldData";
+            string command = string.Format("current/reports/{0}", id);
+            var queryString = new Dictionary<string, object> {["fields"] = "reportData,oldData"};
             var response = await _connection.GetJson<Report>(command, queryString);
             return response;
         }
-        private async Task<string> DeleteReport(string Id)
+        private async Task DeleteReport(string id)
         {
-            string command = String.Format("current/reports/{0}", Id);
-            var response = await _connection.Delete(command);
-            return response;
+            string command = string.Format("current/reports/{0}", id);
+            await _connection.Delete(command);
         }
-        private async Task<Project> GetProject(string Id)
+        private async Task<Project> GetProject(string id)
         {
-            string command = String.Format("admin/project/{0}", Id);
+            string command = string.Format("admin/project/{0}", id);
             var response = await _connection.Get(command, null);
             XDocument doc = XDocument.Parse(response);
-            Project project = SerializationUtil.Deserialize<Project>(doc);
+            Project project = doc.Deserialize<Project>();
             return project;
         }
         private async Task<TimeSettings> GetTimeSettings()
@@ -201,7 +202,7 @@ namespace YouTackTimeReportsWeb.Services
             string command = "admin/timetracking";
             var response = await _connection.Get(command, null);
             XDocument doc = XDocument.Parse(response);
-            TimeSettings timeSettings = SerializationUtil.Deserialize<TimeSettings>(doc);
+            TimeSettings timeSettings = doc.Deserialize<TimeSettings>();
             return timeSettings;
         }
         private async Task<List<User>> GetUsers(string query = null, string group = null, string role = null,
@@ -220,7 +221,7 @@ namespace YouTackTimeReportsWeb.Services
             if (start != null) queryString["start"] = start.ToString();
             var response = await _connection.Get(command, queryString);
             XDocument doc = XDocument.Parse(response);
-            AllUsers allUsers = SerializationUtil.Deserialize<AllUsers>(doc);
+            AllUsers allUsers = doc.Deserialize<AllUsers>();
             List<User> users = new List<User>();
             foreach (var userItem in allUsers.UserList)
             {
@@ -241,7 +242,7 @@ namespace YouTackTimeReportsWeb.Services
             if (response != null)
             {
                 XDocument doc = XDocument.Parse(response);
-                user = SerializationUtil.Deserialize<User>(doc);
+                user = doc.Deserialize<User>();
                 user.Username = username;
             }
             return user;

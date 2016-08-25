@@ -4,6 +4,7 @@ import 'bootstrap';
 import 'reflect-metadata';
 import './styles/site.css';
 
+import { enableProdMode } from '@angular/core';
 import { bootstrap } from '@angular/platform-browser-dynamic';
 import { FormBuilder } from '@angular/common';
 import { provideRouter } from '@angular/router';
@@ -11,6 +12,8 @@ import { HTTP_PROVIDERS } from '@angular/http';
 import { App } from './components/app/app';
 import { routes } from './routes';
 import {NG2_WEBSTORAGE} from 'ng2-webstorage';
+
+enableProdMode();
 
 bootstrap(App, [
     ...HTTP_PROVIDERS,

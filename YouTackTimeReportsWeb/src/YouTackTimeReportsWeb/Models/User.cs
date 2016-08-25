@@ -22,7 +22,7 @@ namespace YouTackTimeReportsWeb.Models
         public AllUsersItem[] Users { get; set; }
 
         [XmlIgnore]
-        public List<AllUsersItem> UserList { get { return new List<AllUsersItem>(Users); } }
+        public List<AllUsersItem> UserList => new List<AllUsersItem>(Users);
     }
     public class AllUsersItem
     {

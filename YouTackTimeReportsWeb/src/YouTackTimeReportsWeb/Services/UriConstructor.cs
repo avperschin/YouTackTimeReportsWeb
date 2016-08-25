@@ -15,14 +15,7 @@ namespace YouTackTimeReportsWeb.Services
             _protocol = protocol;
             _port = port;
             _host = host;
-            if (!String.IsNullOrEmpty(path))
-            {
-                _path = AddPrefixBar(path);
-            }
-            else
-            {
-                _path = null;
-            }
+            _path = !string.IsNullOrEmpty(path) ? AddPrefixBar(path) : null;
         }
 
 

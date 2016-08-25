@@ -15,18 +15,20 @@ namespace YouTackTimeReportsWeb.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(SearchParams parameters)
         {
-            _connection = new Connection(parameters.host, parameters.port, parameters.isssl, parameters.path);
+            _connection = new Connection(parameters.Host, parameters.Port, parameters.IsSsl, parameters.Path);
             try
             {
-                NetworkCredential _credentials = new NetworkCredential();
-                _credentials.UserName = parameters.login;
-                _credentials.Password = parameters.password;
-                bool IsAuthenticated = await _connection.Authenticate(_credentials);
-                if(IsAuthenticated)
+                NetworkCredential credentials = new NetworkCredential
+                {
+                    UserName = parameters.Login,
+                    Password = parameters.Password
+                };
+                bool isAuthenticated = await _connection.Authenticate(credentials);
+                if(isAuthenticated)
                 {
                     _report = new ReportService(_connection);
-                    var report = await _report.GetReports(parameters);
-                    return Json(new { status = 1, report = report });
+                    var finalReport = await _report.GetReports(parameters);
+                    return Json(new { status = 1, report = finalReport });
                 }
                 else
                 {

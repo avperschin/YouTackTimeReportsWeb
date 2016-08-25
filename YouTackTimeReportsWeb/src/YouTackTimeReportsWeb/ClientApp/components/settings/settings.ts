@@ -22,7 +22,7 @@ export class Settings {
         this.password = this.storage.retrieve('password');
         this.settingsFill = this.storage.retrieve('settingsFill');
     }
-    SaveSettings() {
+    saveSettings() {
         this.settingsFill = true;
         this.storage.store('host', this.host);
         this.storage.store('port', this.port);

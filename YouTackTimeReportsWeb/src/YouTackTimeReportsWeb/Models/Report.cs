@@ -1,248 +1,247 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace YouTackTimeReportsWeb.Models
 {
     public class Report
     {
-        public string id { get; set; }
-        public string name { get; set; }
-        public string ownerLogin { get; set; }
-        public string type { get; set; }
-        public bool own { get; set; }
-        public VisibleTo visibleTo { get; set; }
-        public int invalidationInterval { get; set; }
-        public string state { get; set; }
-        public string lastCalculated { get; set; }
-        public int progress { get; set; }
-        public ReportParameters parameters { get; set; }
-        public ReportData reportData { get; set; }
-        public string oldData { get; set; }
-        public DateTime? reportDate { get; set; }
-        public bool reportFill { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string OwnerLogin { get; set; }
+        public string Type { get; set; }
+        public bool Own { get; set; }
+        public VisibleTo VisibleTo { get; set; }
+        public int InvalidationInterval { get; set; }
+        public string State { get; set; }
+        public string LastCalculated { get; set; }
+        public int Progress { get; set; }
+        public ReportParameters Parameters { get; set; }
+        public ReportData ReportData { get; set; }
+        public string OldData { get; set; }
+        public DateTime? ReportDate { get; set; }
+        public bool ReportFill { get; set; }
     }
     public class ReportParameters
     {
-        public List<Projects> projects { get; set; }
-        public string query { get; set; }
-        public string queryUrl { get; set; }
-        public Range range { get; set; }
-        public string groupBy { get; set; }
-        public string groupById { get; set; }
-        public bool perUserAvailable { get; set; }
-        public bool showTypesAvailable { get; set; }
-        public string issuesQuery { get; set; }
+        public List<Projects> Projects { get; set; }
+        public string Query { get; set; }
+        public string QueryUrl { get; set; }
+        public Range Range { get; set; }
+        public string GroupBy { get; set; }
+        public string GroupById { get; set; }
+        public bool PerUserAvailable { get; set; }
+        public bool ShowTypesAvailable { get; set; }
+        public string IssuesQuery { get; set; }
     }
     public class ReportData
     {
-        public bool perUser { get; set; }
-        public string groupBy { get; set; }
-        public string estimation { get; set; }
-        public double estimationNumber
+        public bool PerUser { get; set; }
+        public string GroupBy { get; set; }
+        public string Estimation { get; set; }
+        public double EstimationNumber
         {
             get
             {
-                double Estimation = 0;
-                if (!string.IsNullOrEmpty(estimation) && !string.IsNullOrWhiteSpace(estimation))
+                double estimation = 0;
+                if (!string.IsNullOrEmpty(Estimation) && !string.IsNullOrWhiteSpace(Estimation))
                 {
-                    string[] se = estimation.Split(' ');
+                    var se = Estimation.Split(' ');
                     double t = 0;
-                    for (int j = 0; j < se.Count(); j++)
+                    foreach (string t1 in se)
                     {
-                        if (se[j].Contains("h"))
+                        if (t1.Contains("h"))
                         {
-                            t += Convert.ToInt32(se[j].Replace("h", "")) * 60;
+                            t += Convert.ToInt32(t1.Replace("h", "")) * 60;
                         }
-                        if (se[j].Contains("m"))
+                        if (t1.Contains("m"))
                         {
-                            t += Convert.ToInt32(se[j].Replace("m", ""));
+                            t += Convert.ToInt32(t1.Replace("m", ""));
                         }
                     }
-                    Estimation = t / 60;
+                    estimation = t / 60;
                 }
-                return Estimation;
+                return estimation;
             }
         }
-        public string duration { get; set; }
-        public double durationNumber
+        public string Duration { get; set; }
+        public double DurationNumber
         {
             get
             {
-                double Duration = 0;
-                if (!string.IsNullOrEmpty(duration) && !string.IsNullOrWhiteSpace(duration))
+                double duration = 0;
+                if (!string.IsNullOrEmpty(Duration) && !string.IsNullOrWhiteSpace(Duration))
                 {
-                    string[] sd = duration.Split(' ');
+                    var sd = Duration.Split(' ');
                     double t = 0;
-                    for (int j = 0; j < sd.Count(); j++)
+                    foreach (string t1 in sd)
                     {
-                        if (sd[j].Contains("h"))
+                        if (t1.Contains("h"))
                         {
-                            t += Convert.ToInt32(sd[j].Replace("h", "")) * 60;
+                            t += Convert.ToInt32(t1.Replace("h", "")) * 60;
                         }
-                        if (sd[j].Contains("m"))
+                        if (t1.Contains("m"))
                         {
-                            t += Convert.ToInt32(sd[j].Replace("m", ""));
+                            t += Convert.ToInt32(t1.Replace("m", ""));
                         }
                     }
-                    Duration = t / 60;
+                    duration = t / 60;
                 }
-                return Duration;
+                return duration;
             }
         }
-        public List<Groups> groups { get; set; }
+        public List<Groups> Groups { get; set; }
     }
     public class Groups
     {
-        public string name { get; set; }
-        public string duration { get; set; }
-        public double durationNumber
+        public string Name { get; set; }
+        public string Duration { get; set; }
+        public double DurationNumber
         {
             get
             {
-                double Duration = 0;
-                if (!string.IsNullOrEmpty(duration) && !string.IsNullOrWhiteSpace(duration))
+                double duration = 0;
+                if (!string.IsNullOrEmpty(Duration) && !string.IsNullOrWhiteSpace(Duration))
                 {
-                    string[] sd = duration.Split(' ');
+                    var sd = Duration.Split(' ');
                     double t = 0;
-                    for (int j = 0; j < sd.Count(); j++)
+                    foreach (string t1 in sd)
                     {
-                        if (sd[j].Contains("h"))
+                        if (t1.Contains("h"))
                         {
-                            t += Convert.ToInt32(sd[j].Replace("h", "")) * 60;
+                            t += Convert.ToInt32(t1.Replace("h", "")) * 60;
                         }
-                        if (sd[j].Contains("m"))
+                        if (t1.Contains("m"))
                         {
-                            t += Convert.ToInt32(sd[j].Replace("m", ""));
+                            t += Convert.ToInt32(t1.Replace("m", ""));
                         }
                     }
-                    Duration = t / 60;
+                    duration = t / 60;
                 }
-                return Duration;
+                return duration;
             }
         }
-        public string estimation { get; set; }
-        public double estimationNumber
+        public string Estimation { get; set; }
+        public double EstimationNumber
         {
             get
             {
-                double Estimation = 0;
-                if (!string.IsNullOrEmpty(estimation) && !string.IsNullOrWhiteSpace(estimation))
+                double estimation = 0;
+                if (!string.IsNullOrEmpty(Estimation) && !string.IsNullOrWhiteSpace(Estimation))
                 {
-                    string[] se = estimation.Split(' ');
+                    var se = Estimation.Split(' ');
                     double t = 0;
-                    for (int j = 0; j < se.Count(); j++)
+                    foreach (string t1 in se)
                     {
-                        if (se[j].Contains("h"))
+                        if (t1.Contains("h"))
                         {
-                            t += Convert.ToInt32(se[j].Replace("h", "")) * 60;
+                            t += Convert.ToInt32(t1.Replace("h", "")) * 60;
                         }
-                        if (se[j].Contains("m"))
+                        if (t1.Contains("m"))
                         {
-                            t += Convert.ToInt32(se[j].Replace("m", ""));
+                            t += Convert.ToInt32(t1.Replace("m", ""));
                         }
                     }
-                    Estimation = t / 60;
+                    estimation = t / 60;
                 }
-                return Estimation;
+                return estimation;
             }
         }
-        public List<Lines> lines { get; set; }
+        public List<Lines> Lines { get; set; }
     }
     public class Lines
     {
-        public string userName { get; set; }
-        public string issueId { get; set; }
-        public string issueUrl { get; set; }
-        public string issueSummary { get; set; }
-        public string duration { get; set; }
-        public double durationNumber
+        public string UserName { get; set; }
+        public string IssueId { get; set; }
+        public string IssueUrl { get; set; }
+        public string IssueSummary { get; set; }
+        public string Duration { get; set; }
+        public double DurationNumber
         {
             get
             {
-                double Duration = 0;
-                if (!string.IsNullOrEmpty(duration) && !string.IsNullOrWhiteSpace(duration))
+                double duration = 0;
+                if (!string.IsNullOrEmpty(Duration) && !string.IsNullOrWhiteSpace(Duration))
                 {
-                    string[] sd = duration.Split(' ');
+                    var sd = Duration.Split(' ');
                     double t = 0;
-                    for (int j = 0; j < sd.Count(); j++)
+                    foreach (string t1 in sd)
                     {
-                        if (sd[j].Contains("h"))
+                        if (t1.Contains("h"))
                         {
-                            t += Convert.ToInt32(sd[j].Replace("h", "")) * 60;
+                            t += Convert.ToInt32(t1.Replace("h", "")) * 60;
                         }
-                        if (sd[j].Contains("m"))
+                        if (t1.Contains("m"))
                         {
-                            t += Convert.ToInt32(sd[j].Replace("m", ""));
+                            t += Convert.ToInt32(t1.Replace("m", ""));
                         }
                     }
-                    Duration = t / 60;
+                    duration = t / 60;
                 }
-                return Duration;
+                return duration;
             }
         }
-        public string estimation { get; set; }
-        public double estimationNumber
+        public string Estimation { get; set; }
+        public double EstimationNumber
         {
             get
             {
-                double Estimation = 0;
-                if (!string.IsNullOrEmpty(estimation) && !string.IsNullOrWhiteSpace(estimation))
+                double estimation = 0;
+                if (!string.IsNullOrEmpty(Estimation) && !string.IsNullOrWhiteSpace(Estimation))
                 {
-                    string[] se = estimation.Split(' ');
+                    var se = Estimation.Split(' ');
                     double t = 0;
-                    for (int j = 0; j < se.Count(); j++)
+                    foreach (string t1 in se)
                     {
-                        if (se[j].Contains("h"))
+                        if (t1.Contains("h"))
                         {
-                            t += Convert.ToInt32(se[j].Replace("h", "")) * 60;
+                            t += Convert.ToInt32(t1.Replace("h", "")) * 60;
                         }
-                        if (se[j].Contains("m"))
+                        if (t1.Contains("m"))
                         {
-                            t += Convert.ToInt32(se[j].Replace("m", ""));
+                            t += Convert.ToInt32(t1.Replace("m", ""));
                         }
                     }
-                    Estimation = t / 60;
+                    estimation = t / 60;
                 }
-                return Estimation;
+                return estimation;
             }
         }
-        public string groupName { get; set; }
-        public List<TypeDurations> typeDurations { get; set; }
+        public string GroupName { get; set; }
+        public List<TypeDurations> TypeDurations { get; set; }
     }
     public class TypeDurations
     {
-        public string workType { get; set; }
-        public string timeSpent { get; set; }
+        public string WorkType { get; set; }
+        public string TimeSpent { get; set; }
     }
     public class CreateReport
     {
-        public string type { get; set; }
-        public CreateReportParameters parameters { get; set; }
-        public bool own { get; set; }
-        public string name { get; set; }
+        public string Type { get; set; }
+        public CreateReportParameters Parameters { get; set; }
+        public bool Own { get; set; }
+        public string Name { get; set; }
     }
     public class CreateReportParameters
     {
-        public Range range { get; set; }
-        public List<Projects> projects { get; set; }
-        public string groupById { get; set; }
+        public Range Range { get; set; }
+        public List<Projects> Projects { get; set; }
+        public string GroupById { get; set; }
     }
     public class Range
     {
-        public string type { get; set; }
-        public long from { get; set; }
-        public long to { get; set; }
+        public string Type { get; set; }
+        public long From { get; set; }
+        public long To { get; set; }
     }
     public class Projects
     {
-        public string name { get; set; }
-        public string shortName { get; set; }
+        public string Name { get; set; }
+        public string ShortName { get; set; }
     }
     public class VisibleTo
     {
-        public string name { get; set; }
-        public string url { get; set; }
+        public string Name { get; set; }
+        public string Url { get; set; }
     }
     public class FinalReport
     {
